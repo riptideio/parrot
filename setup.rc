@@ -1,0 +1,37 @@
+#  Copyright (c) 2020 Riptide IO, Inc.
+#  All rights reserved.
+
+snapcraft () {
+  # Work around snapcraft macOS bug [1866251](https://bugs.launchpad.net/snapcraft/+bug/1866251)
+  local name
+  local args
+  local cleaned
+  cleaned=false
+  args=()
+  if [ ! -e snap/snapcraft.yaml ]; then
+    echo "ERROR: snap/snapcraft.yaml does not exist." >&2
+    return 1
+  fi
+  name="$(grep "^name:" snap/snapcraft.yaml | head -n 1 | sed 's/:/ /' | awk '{print $2;}')"
+  while [ $# -gt 0 ]; do
+    if [ $(uname) == Darwin ]; then
+      if [ "$1" == clean ]; then
+        if multipass info snapcraft-${name} &>/dev/null; then
+          multipass umount snapcraft-${name}
+          multipass stop --cancel snapcraft-${name}
+          echo sudo rm -rf /root/{parts,prime,snap,stage,state} | multipass shell snapcraft-${name}
+          multipass stop --time 10 snapcraft-${name}
+        fi
+        rm -f *.snap
+        cleaned=true
+        shift
+        continue
+      fi
+    fi
+    args+=("$1")
+    shift
+  done
+  if ! $cleaned || [ "${#args}" -gt 0 ]; then
+    $(which snapcraft) ${args[@]}
+  fi
+}

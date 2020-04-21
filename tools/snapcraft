@@ -1,0 +1,9 @@
+#!/bin/bash
+#
+#  Copyright (c) 2020 Riptide IO, Inc.
+#  All rights reserved.
+#
+cd $(dirname $0)/..
+source setup.rc
+rm -f *.snap
+snapcraft "$@"

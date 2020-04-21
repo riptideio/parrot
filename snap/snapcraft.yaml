@@ -1,0 +1,41 @@
+#  Copyright (c) 2020 Riptide IO, Inc.
+#  All rights reserved.
+
+name: parrot
+summary: Test 485 serial ports.
+description: |
+  A simple serial port echo test.
+
+  Parrot consists of an executable that can be run in a client or server
+  mode. The server side generates simple packets and the client side just
+  echoes the packet.
+
+type: app
+adopt-info: parrot
+
+base: core
+confinement: devmode
+grade: devel
+
+parts:
+  parrot:
+    plugin: cmake
+    source: src
+    build-packages:
+      - git
+    override-pull: |
+      set -ex
+      snapcraftctl pull
+      [ -e r48.tar.gz ] || wget https://github.com/benhoyt/inih/archive/r48.tar.gz
+      rm -rf inih-r48
+      tar xzf r48.tar.gz
+      EC_VERSION="$($SNAPCRAFT_PROJECT_DIR/tools/version)"
+      sed -i "s/%VERSION%/${EC_VERSION}/" main.c
+      snapcraftctl set-version "${EC_VERSION}" || true  # For some reason snapcraft occansionally insists
+                                                        # override-pull already ran set-version. ¯\_(ツ)_/¯
+    stage:
+      - bin
+
+apps:
+  parrot:
+    command: bin/parrot

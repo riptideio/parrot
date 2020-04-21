@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+#  Copyright (c) 2020 Riptide IO, Inc.
+#  All rights reserved.
+#
+cd $(dirname $0)
+show_current_branch () {
+  # git branch --show-current # is only available git >= 2.2
+  git symbolic-ref -q --short HEAD 2>/dev/null || git rev-parse --short HEAD
+}
+git describe --dirty=~$(
+    [ $(show_current_branch) == master ] && echo dev || echo $(show_current_branch)
+)
