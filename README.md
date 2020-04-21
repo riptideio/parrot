@@ -24,13 +24,19 @@ to the real `snapcraft`.
     $ source setup.rc
     $ snapcraft clean snap  
 
+### Installing
+
+This snap must be installed in `-devmode`:
+
+    $ sudo snap install --devmode parrot_1.0_amd64.snap
+
 ### Configuration
 
 Parrot can use a configuration file or command line arguments.
 Command line arguments take precedence over settings in the
 configuration file.
 
-#### Command Line Aruments
+#### Command Line Arguments
 
     $ parrot --help
     Usage: parrot [OPTION...]
@@ -81,12 +87,16 @@ are all equivalent.
 ## Usage
 
 Connect two serial ports. In one terminal run parrot as a client on one
-serial port and as a server on the other serial port.
+serial port and as a server on the other serial port. Parrot will run
+until it's interrupted (via ^C, for instance) or until it detects the
+UART transmit queue has stopped draining.
 
 Without debugging enabled, there is not any output unless kernel/UART
 stops sending data.
 
 ### Client Example
+
+In this example the client's serial port stops transmitting.
 
     $ sudo parrot -d -r client -i /dev/ttyS5
     overrides:
@@ -145,6 +155,8 @@ stops sending data.
     Read valid 68 byte packet.
     valid echo.
     . . .
+    ERROR: tcdrain failed, Interrupted system call.
+    Closing down /dev/ttyS2 serial device...done.
 
 ### Server Example
 
@@ -183,7 +195,14 @@ stops sending data.
      Read valid 68 byte packet.
      valid echo.
      . . .
-     
+     send_packet: sending 66 byte packet.
+     Sent 66 byte packet.
+     read timed out
+     send_packet: sending 125 byte packet.
+     Sent 125 byte packet.
+     read timed out
+     . . .
+
 ## Acknowledgements
 
 1. This project uses the [inih (INI Not Invented Here)](https://github.com/benhoyt/inih)
