@@ -96,91 +96,40 @@ stops sending data.
 
 ### Client Example
 
-In this example the client's serial port stops transmitting.
+In this example the client reads start timing out because the
+server side stops transmitting.
 
     $ sudo parrot -d -r client -i /dev/ttyS5
-    overrides:
-     .ini_file = (null)
-     .role = client
-     .set_role = 1
-     .baudrate = 38400
-     .set_baudrate = 0
-     .interface = /dev/ttyS5
-     .set_interface = 1
-     .debug = ,
-     .set_debug = 1
-    merged config:
-     .ini_file = (null)
-     .role = client
-     .set_role = 1
-     .baudrate = 38400
-     .set_baudrate = 0
-     .interface = /dev/ttyS5
-     .set_interface = 1
-     .debug = ,
-     .set_debug = 1
     client_loop
-    $ sudo parrot -d -r server -i /dev/ttyS2
-    overrides:
-     .ini_file = (null)
-     .role = server
-     .set_role = 1
-     .baudrate = 38400
-     .set_baudrate = 0
-     .interface = /dev/ttyS2
-     .set_interface = 1
-     .debug = ,
-     .set_debug = 1
-    merged config:
-     .ini_file = (null)
-     .role = server
-     .set_role = 1
-     .baudrate = 38400
-     .set_baudrate = 0
-     .interface = /dev/ttyS2
-     .set_interface = 1
-     .debug = ,
-     .set_debug = 1
-    server_loop
+    Read valid 13 byte packet.
     send_packet: sending 13 byte packet.
     Sent 13 byte packet.
-    Read valid 13 byte packet.
-    valid echo.
+    Read valid 42 byte packet.
     send_packet: sending 42 byte packet.
     Sent 42 byte packet.
-    Read valid 42 byte packet.
-    valid echo.
+    Read valid 68 byte packet.
     send_packet: sending 68 byte packet.
     Sent 68 byte packet.
-    Read valid 68 byte packet.
-    valid echo.
-    . . .
-    ERROR: tcdrain failed, Interrupted system call.
-    Closing down /dev/ttyS2 serial device...done.
+    Read valid 124 byte packet.
+    send_packet: sending 124 byte packet.
+    Sent 124 byte packet.
+    read timed out
+    read timed out
+    read timed out
+    read timed out
+    read timed out
+    read timed out
+    read timed out
+    read timed out
+    read timed out
+    ^C
 
 ### Server Example
 
+In this example the server side UART stops draining the transmit
+queue. Upon detecting this, it prints an error and exits.
+
      $ sudo parrot -d -r server -i /dev/ttyS2
-     overrides:
-      .ini_file = (null)
-      .role = server
-      .set_role = 1
-      .baudrate = 38400
-      .set_baudrate = 0
-      .interface = /dev/ttyS2
-      .set_interface = 1
-      .debug = ,
-      .set_debug = 1
-     merged config:
-      .ini_file = (null)
-      .role = server
-      .set_role = 1
-      .baudrate = 38400
-      .set_baudrate = 0
-      .interface = /dev/ttyS2
-      .set_interface = 1
-      .debug = ,
-      .set_debug = 1
      server_loop
      send_packet: sending 13 byte packet.
      Sent 13 byte packet.
@@ -194,14 +143,13 @@ In this example the client's serial port stops transmitting.
      Sent 68 byte packet.
      Read valid 68 byte packet.
      valid echo.
-     . . .
+     send_packet: sending 124 byte packet.
+     Sent 124 byte packet.
+     Read valid 124 byte packet.
+     valid echo.
      send_packet: sending 66 byte packet.
-     Sent 66 byte packet.
-     read timed out
-     send_packet: sending 125 byte packet.
-     Sent 125 byte packet.
-     read timed out
-     . . .
+     ERROR: tcdrain failed, Interrupted system call.
+     Closing down /dev/ttyS2 serial device...done.
 
 ## Acknowledgements
 

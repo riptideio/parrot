@@ -8,6 +8,10 @@
  * Uncomment `#define DEBUG_STDERR_ALWAYS' to debug debug.
  */
 // #define DEBUG_STDERR_ALWAYS
+/*
+ * Uncomment `#define DEBUG_CONFIG' to debug configuration.
+ */
+// #define DEBUG_CONFIG
 
 #include <stdio.h>
 

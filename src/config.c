@@ -36,15 +36,15 @@ static struct argp_option options[] =  {
 };
 
 #define CONFIG_FORMAT "\
- .ini_file = %s\n\
- .role = %s\n\
- .set_role = %d\n\
- .baudrate = %d\n\
- .set_baudrate = %d\n\
- .interface = %s\n\
- .set_interface = %d\n\
- .debug = %s,\n\
- .set_debug = %d\n"
+ .ini_file: = %s\n\
+ .role: = %s\n\
+ .set_role: = %d\n\
+ .baudrate: = %d\n\
+ .set_baudrate: = %d\n\
+ .interface: %s\n\
+ .set_interface: %d\n\
+ .debug: %s\n\
+ .set_debug: %d\n"
 
 void debug_print_config(const configuration *c) {
     debug_printf(
@@ -196,21 +196,27 @@ configuration get_configuration(int argc, char* argv[]) {
     /* Arguments have the highest precedence. */
     argp_parse(&argp, argc, argv, 0, 0, &overrides);
     config_debug(&overrides);
+#ifdef DEBUG_CONFIG
     debug_printf("overrides:\n");
     debug_print_config(&overrides);
+#endif
     if (overrides.ini_file != NULL) {
         /* If there is a config file, load it. */
         if (ini_parse(overrides.ini_file, ini_file_handler, &config) < 0) {
             fail("Can't load '%s' as a configuration file\n", overrides.ini_file);
         }
+#ifdef DEBUG_CONFIG
         debug_printf("%s:\n", overrides.ini_file);
         debug_print_config(&config);
+#endif
     }
     /* Update the configuration from the arguments (aka overrides.) */
     override_config(&config, &overrides);
     config_debug(&config);
+#ifdef DEBUG_CONFIG
     debug_printf("merged config:\n");
     debug_print_config(&config);
+#endif
     validate_config(&config);
     return config;
 }
