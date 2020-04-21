@@ -28,7 +28,7 @@ to the real `snapcraft`.
 
 This snap must be installed in `-devmode`:
 
-    $ sudo snap install --devmode parrot_1.0_amd64.snap
+    $ sudo snap install --devmode parrot_1.3_amd64.snap
 
 ### Configuration
 

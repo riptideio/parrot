@@ -30,7 +30,7 @@ parts:
       rm -rf inih-r48
       tar xzf r48.tar.gz
       EC_VERSION="$($SNAPCRAFT_PROJECT_DIR/tools/version)"
-      sed -i "s/%VERSION%/${EC_VERSION}/" main.c
+      sed -i "s/%VERSION%/${EC_VERSION}/" config.c
       snapcraftctl set-version "${EC_VERSION}" || true  # For some reason snapcraft occansionally insists
                                                         # override-pull already ran set-version. ¯\_(ツ)_/¯
     stage:
