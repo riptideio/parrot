@@ -85,6 +85,7 @@ void close_interface(interface_struct *interface) {
         fprintf(stderr, "Closing down %s serial device...", __atexit_interface_hack.device);
         fflush(stderr);
         tcsetattr(interface->fd, TCSANOW, &interface->saved_termios);
+        ioctl(interface->fd, TIOCSSERIAL, &interface->saved_serial);
         close(interface->fd);
         interface->is_open = false;
         interface->fd = -1;
@@ -92,8 +93,59 @@ void close_interface(interface_struct *interface) {
     }
 }
 
+typedef struct {
+    char *name;
+    unsigned int flag;
+} flag_names;
+
+flag_names known_flags [] = {
+    {.name = "ASYNC_HUP_NOTIFY", .flag = ASYNC_HUP_NOTIFY},
+    {.name = "ASYNC_FOURPORT ", .flag = ASYNC_FOURPORT},
+    {.name = "ASYNC_SAK", .flag = ASYNC_SAK},
+    {.name = "ASYNC_SPLIT_TERMIOS", .flag = ASYNC_SPLIT_TERMIOS},
+    {.name = "ASYNC_SPD_MASK", .flag = ASYNC_SPD_MASK},
+    {.name = "ASYNC_SPD_VHI", .flag = ASYNC_SPD_VHI},
+    {.name = "ASYNC_SPD_CUST", .flag = ASYNC_SPD_CUST},
+    {.name = "ASYNC_SKIP_TEST", .flag = ASYNC_SKIP_TEST},
+    {.name = "ASYNC_AUTO_IRQ ", .flag = ASYNC_AUTO_IRQ},
+    {.name = "ASYNC_SESSION_LOCKOUT", .flag = ASYNC_SESSION_LOCKOUT},
+    {.name = "ASYNC_PGRP_LOCKOUT   ", .flag = ASYNC_PGRP_LOCKOUT},
+    {.name = "ASYNC_CALLOUT_NOHUP  ", .flag = ASYNC_CALLOUT_NOHUP},
+    {.name = "ASYNC_HARDPPS_CD", .flag = ASYNC_HARDPPS_CD},
+    {.name = "ASYNC_SPD_SHI", .flag = ASYNC_SPD_SHI},
+    {.name = "ASYNC_SPD_WARP", .flag = ASYNC_SPD_WARP},
+    {.name = "ASYNC_LOW_LATENCY", .flag = ASYNC_LOW_LATENCY}
+};
+
+static void debug_serial_settings(struct serial_struct *serial_settings) {
+    debug_printf("  serial_settings:\n");
+    debug_printf("  type %d\n", serial_settings->type);
+    debug_printf("  line %d\n", serial_settings->line);
+    debug_printf("  port %u\n", serial_settings->port);
+    debug_printf("  irq %d\n", serial_settings->irq);
+    // debug_printf("  flags %d\n", serial_settings->flags);
+    debug_printf("  flags ", serial_settings->flags);
+    for (int i=0; i< sizeof(known_flags)/ sizeof(flag_names); ++i) {
+        if (serial_settings->flags & known_flags[i].flag) {
+            debug_printf("%s ", known_flags[i].name);
+        }
+    }
+    debug_printf("\n");
+    debug_printf("  xmit_fifo_size %d\n", serial_settings->xmit_fifo_size);
+    debug_printf("  custom_divisor %d\n", serial_settings->custom_divisor);
+    debug_printf("  baud_base %d\n", serial_settings->baud_base);
+    debug_printf("  close_delay %hu\n", serial_settings->close_delay);
+    debug_printf("  hub6 %d\n", serial_settings->hub6);
+    debug_printf("  closing_wait %hu\n", serial_settings->closing_wait);
+    debug_printf("  iomem_base %p\n", serial_settings->iomem_base);
+    debug_printf("  iomem_reg_shift %hu\n", serial_settings->iomem_reg_shift);
+    debug_printf("  port_high %u\n", serial_settings->port_high);
+    debug_printf("  iomap_base %lu\n", serial_settings->iomap_base);
+}
+
 void open_interface(interface_struct *interface) {
     struct termios termios_settings;
+    struct serial_struct serial_settings;
     int fd;
     if (interface->is_open) {
         close_interface(interface);
@@ -105,6 +157,13 @@ void open_interface(interface_struct *interface) {
     interface->fd = fd;
     fcntl(interface->fd, F_SETFL, 0);
     memset(&termios_settings, 0, sizeof(termios_settings));
+    memset(&serial_settings, 0, sizeof(serial_settings));
+    if (ioctl(fd, TIOCGSERIAL, &serial_settings) < 0) {
+        fail_with_errno("Cannot get serial info");
+    }
+    memcpy(&interface->saved_serial, &serial_settings, sizeof(serial_settings));
+    debug_serial_settings(&serial_settings);
+    serial_settings.irq = 0;
     termios_settings.c_cc[VMIN] = 1;
     termios_settings.c_cc[VTIME] = 100;
     termios_settings.c_cflag = interface->bps | CS8 | CLOCAL | CREAD;

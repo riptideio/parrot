@@ -6,9 +6,10 @@
 #define ECHO_CHAMBER_COMM_H
 
 #include <stdbool.h>
-
 #include <termios.h>
 #include <unistd.h>
+
+#include <linux/serial.h>
 
 typedef struct {
     const char *device;
@@ -16,6 +17,7 @@ typedef struct {
     int  fd;
     unsigned int bps;
     struct termios saved_termios;
+    struct serial_struct saved_serial;
 } interface_struct;
 
 interface_struct new_interface(const char *interface_path);
