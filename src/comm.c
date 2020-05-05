@@ -163,8 +163,10 @@ void open_interface(interface_struct *interface) {
     }
     memcpy(&interface->saved_serial, &serial_settings, sizeof(serial_settings));
     debug_serial_settings(&serial_settings);
-    serial_settings.irq = 0;
-    ioctl(interface->fd, TIOCSSERIAL, &serial_settings);
+/*
+ *    serial_settings.irq = 0;
+ *    ioctl(interface->fd, TIOCSSERIAL, &serial_settings);
+ */
     termios_settings.c_cc[VMIN] = 1;
     termios_settings.c_cc[VTIME] = 100;
     termios_settings.c_cflag = interface->bps | CS8 | CLOCAL | CREAD;
