@@ -16,4 +16,9 @@ add_definitions(
 add_executable(parrot main.c client.c comm.c config.c debug.c fail.c server.c inih-r48/ini.c)
 target_compile_options(parrot PUBLIC "-DINI_INLINE_COMMENT_PREFIXES=\"\#\"")
 target_compile_options(parrot PUBLIC "-DINI_START_COMMENT_PREFIXES=\"\#\"")
-install(TARGETS parrot DESTINATION bin)
+
+add_executable(setserial setserial.c)
+target_compile_options(setserial PUBLIC "-DSETSERIAL_VERSION=\"2.17\"")
+target_compile_options(setserial PUBLIC "-DSETSERIAL_DATE=\"27-Jan-2000\"")
+
+install(TARGETS parrot setserial DESTINATION bin)

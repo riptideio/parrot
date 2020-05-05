@@ -39,3 +39,6 @@ parts:
 apps:
   parrot:
     command: bin/parrot
+
+  setserial:
+    command: bin/setserial
