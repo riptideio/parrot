@@ -1,0 +1,13 @@
+#!/bin/bash
+
+poll_mode=$(snapctl get poll-mode 2>/dev/null || echo false | tr '[:upper:]' '[:lower:]')
+
+case "${poll_mode:-false}" in
+  0|n|no|f|false) snapctl set poll-mode=false ;;
+  1|y|yes|t|true) snapctl set poll-mode=true ;;
+  *) echo "ERROR: poll-mode can only be set to true or false." >&2 ; exit 1 ;;
+esac
+
+if [ ${poll_mode} == true ]; then
+  $SNAP/bin/bedge-4420-hack --force
+fi

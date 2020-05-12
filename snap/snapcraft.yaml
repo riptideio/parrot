@@ -42,3 +42,10 @@ apps:
 
   setserial:
     command: bin/setserial
+
+  bedge-4420-hack:
+    daemon: oneshot
+    command: bin/bedge-4420-hack
+    adapter: full
+    plugs:
+      - serial-port

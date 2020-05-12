@@ -22,3 +22,4 @@ target_compile_options(setserial PUBLIC "-DSETSERIAL_VERSION=\"2.17\"")
 target_compile_options(setserial PUBLIC "-DSETSERIAL_DATE=\"27-Jan-2000\"")
 
 install(TARGETS parrot setserial DESTINATION bin)
+install(PROGRAMS bedge-4420-hack DESTINATION bin)

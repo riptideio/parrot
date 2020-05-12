@@ -1,0 +1,47 @@
+#!/bin/bash
+
+if [ $(id -u) -ne 0 ]; then
+  echo "ERROR: Must be run as super user."
+  exit 1
+fi
+
+brightedge_active=$(systemctl is-active snap.brightedge.beser.service)
+platform="$(cat /sys/devices/virtual/dmi/id/product_name || echo unknown)"
+
+if [ "${1:-}" == "--force" ]; then
+  poll_mode=true
+else
+  poll_mode="$(snapctl get poll-mode)"
+fi
+
+if [ "$poll_mode" == true ]; then
+  case "$platform" in
+  Edge\ Gateway\ 5[0-1]00) platform="Dell Edge Gateway 5x00" ;;
+  Edge\ Gateway\ 300[0-4]) platform="Dell Edge Gateway 300x" ;;
+  *)
+    echo "Unknown platform '$platform', can't automatically set serial IRQs to poll-mode" >&2
+    exit 1
+    ;;
+  esac
+  if [ "$brightedge_active" == active ]; then
+    echo "Shutting down brightedge"
+    systemctl stop snap.brightedge.beser.service
+  fi
+  if [ "$platform" == "Dell Edge Gateway 5x00" ]; then
+    echo "Setting serial ports on a $platform to poll-mode (bedge-4420)"
+    sudo parrot.setserial -a /dev/ttyS0 irq 0
+    sudo parrot.setserial -a /dev/ttyS2 irq 0
+    sudo parrot.setserial -a /dev/ttyS4 irq 0
+    sudo parrot.setserial -a /dev/ttyS5 irq 0
+  fi
+  if [ "$platform" == "Dell Edge Gateway 300x" ]; then
+    echo "Setting serial ports on a $platform to poll-mode (why?)"
+    sudo parrot.setserial -a /dev/ttyXRUSB0 irq 0
+    sudo parrot.setserial -a /dev/ttyXRUSB1 irq 0
+  fi
+  if [ "$brightedge_active" == active ]; then
+    # If it was active, restart it.
+    echo "Restarting brightedge"
+    systemctl start snap.brightedge.beser.service
+  fi
+fi

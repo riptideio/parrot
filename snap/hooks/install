@@ -1,0 +1,9 @@
+#!/bin/bash
+
+service_file=/etc/systemd/system/snap.parrot.bedge-4420-hack.service
+if ! grep -q '^Before=snap.brightedge.beser.service$'; then
+  echo "Hacking $service_file"
+  sed -i '/Before=snap.brightedge.beser.service/d' ${service_file}
+  sed -i '/X-Snappy=yes/i\
+Before=snap.brightedge.beser.service' ${service_file}
+fi
